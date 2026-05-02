@@ -1,45 +1,109 @@
-body {
-    margin: 0;
-    font-family: sans-serif;
-    background-color: #f0fdf4;
-    overflow: hidden;
+:root {
+    --primary: #22c55e;
+    --secondary: #16a34a;
+    --accent: #fbbf24;
+    --dark: #064e3b;
+    --light: #f0fdf4;
+    --white: #ffffff;
 }
 
-.screen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.hidden { display: none !important; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-#status-panel {
-    position: fixed;
-    top: 20px;
-    width: 90%;
-    max-width: 400px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 15px;
-    border-radius: 20px;
-    z-index: 100;
-    border: 3px solid #ccc;
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light);
+    color: var(--dark);
+    overflow: hidden;
+    height: 100vh;
+}
+
+.screen {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hidden { opacity: 0; pointer-events: none; transform: scale(0.9); }
+
+/* Karşılama Ekranı Stili */
+.main-bg {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: var(--white);
+}
+
+.logo-area { font-size: 100px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 10px; font-weight: 800; }
+h1 span { color: var(--accent); }
+
+.glow-btn {
+    background: var(--accent);
+    color: var(--dark);
+    border: none;
+    padding: 18px 40px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.4);
+    cursor: pointer;
     transition: 0.3s;
 }
 
-/* Dinamik Renkler */
-.status-plastik { border-color: #fbbf24; }
-.status-karton { border-color: #3b82f6; }
-.status-cam { border-color: #10b981; }
-
-#webcam-container canvas {
-    width: 100% !important;
-    height: auto !important;
-    border-radius: 20px;
-    border: 5px solid #22c55e;
+/* Kamera Alanı */
+#scan-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    border-radius: 40px;
+    border: 6px solid var(--white);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    overflow: hidden;
+    background: #000;
 }
 
-button {
-    background-color: #22c55e;
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    margin-top: 10px;
+#webcam-container canvas { width: 100% !important; height: 100% !important; object-fit: cover; }
+
+.scan-bar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--accent);
+    box-shadow: 0 0 15px var(--accent);
+    animation: scanning 2.5s linear infinite;
 }
+
+/* Sonuç Kartı */
+#result-panel {
+    position: absolute;
+    bottom: 40px;
+    width: 90%;
+    max-width: 380px;
+}
+
+.result-card {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-top: 8px solid var(--primary);
+}
+
+.action-group { display: flex; gap: 10px; margin-top: 15px; }
+.btn-success { background: var(--primary); color: white; border: none; flex: 2; padding: 12px; border-radius: 15px; font-weight: bold; }
+.btn-retry { background: #ef4444; color: white; border: none; flex: 1; padding: 12px; border-radius: 15px; font-weight: bold; }
+
+/* Animasyonlar */
+@keyframes scanning { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+.pulse { animation: pulseAnim 1.5s infinite; font-weight: bold; margin-top: 15px; color: var(--secondary); }
+@keyframes pulseAnim { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
