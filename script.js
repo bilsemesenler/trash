@@ -49,31 +49,41 @@ async function loop() {
     window.requestAnimationFrame(loop);
 }
 
+let isPopupActive = false; // Pop-up'ın açık olup olmadığını takip eder
+
 async function predict() {
+    if (isPopupActive) return; // Pop-up açıksa yeni tahmin yapma
+
     const prediction = await model.predict(webcam.canvas);
     
     for (let i = 0; i < maxPredictions; i++) {
-        // Eğer bir atık türü %90 güvenle tanınırsa pop-up aç
-        if (prediction[i].probability > 0.90) {
+        if (prediction[i].probability > 0.85) {
+            isPopupActive = true; // Tahmin başarılı, kilidi aktifleştir
             showPopup(prediction[i].className);
         }
     }
 }
 
 function showPopup(wasteType) {
-    // Kamerayı durdurma veya döngüyü askıya alma opsiyoneldir
     document.getElementById('waste-name').innerText = "Bu bir " + wasteType + "!";
     
-    // Basit yönlendirme mantığı
-    let instruction = "";
-    if(wasteType === "Plastik") instruction = "Lütfen Sarı Renkli Geri Dönüşüm Kutusuna atın.";
-    else if(wasteType === "Kağıt") instruction = "Lütfen Mavi Renkli Geri Dönüşüm Kutusuna atın.";
-    else if(wasteType === "Cam") instruction = "Lütfen Yeşil Renkli Geri Dönüşüm Kutusuna atın.";
-    else instruction = "Lütfen uygun atık kutusuna bırakın.";
-
+    // Türlere göre yönlendirme
+    let instruction = "Uygun kutuya atın.";
+    if(wasteType === "Plastik") instruction = "Sarı kutuya atılmalı.";
+    else if(wasteType === "Karton") instruction = "Mavi kutuya atılmalı.";
+    
     document.getElementById('waste-instruction').innerText = instruction;
     resultPopup.classList.remove('hidden');
 }
+
+// Butona tıklandığında pop-up'ı kapat ve yeni tarama için kilidi kaldır
+document.getElementById('action-btn').addEventListener('click', () => {
+    resultPopup.classList.add('hidden');
+    isPopupActive = false; // Yeni taramalara izin ver
+    
+    // Opsiyonel: Direkt tebrik ekranına geçmek yerine taramaya devam edebilirsin
+    // successScreen.classList.remove('hidden'); // Eğer bu satırı silersen sürekli tarama yapabilir
+});
 
 // Buton Etkinlikleri
 document.getElementById('start-btn').addEventListener('click', async () => {

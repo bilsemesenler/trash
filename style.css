@@ -51,20 +51,55 @@ button:active { transform: scale(0.95); }
 }
 
 /* Modal Tasarımı */
+/* Modal (Dış Çerçeve) */
 .modal {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
+    top: 20px; /* Üstten biraz boşluk */
+    left: 0;
+    width: 100%;
+    height: auto; /* Tüm ekranı kaplamasın */
+    background: transparent; /* Arka planı karartma */
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Üste hizala */
     justify-content: center;
+    z-index: 1000;
+    pointer-events: none; /* Altındaki kameraya tıklanabilsin */
 }
 
+/* Pop-up İçeriği (Kart) */
 .modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    width: 80%;
+    background: rgba(255, 255, 255, 0.95); /* Hafif şeffaf beyaz */
+    padding: 15px 25px;
+    border-radius: 15px;
+    width: 85%;
+    max-width: 350px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    border-top: 5px solid #22c55e; /* Yeşil şerit */
+    pointer-events: auto; /* Sadece karta tıklanabilsin */
+    animation: slideDown 0.4s ease-out;
+}
+
+/* Animasyon: Yukarıdan aşağı süzülme */
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+#waste-name {
+    font-size: 1.4rem;
+    margin: 0 0 5px 0;
+    color: #166534;
+}
+
+#waste-instruction {
+    font-size: 0.9rem;
+    margin: 0 0 10px 0;
+    color: #374151;
+}
+
+#action-btn {
+    padding: 8px 20px;
+    font-size: 0.9rem;
 }
 
 .badge { font-size: 100px; margin: 20px 0; }
