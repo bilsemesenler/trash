@@ -19,17 +19,16 @@
         </div>
     </section>
 
+    <!-- Kamera Ekranı İçinde -->
     <section id="camera-screen" class="screen hidden">
-        <div id="webcam-container"></div>
-        <div id="label-container">Analiz ediliyor...</div>
-        
-        <div id="result-popup" class="modal hidden">
-            <div class="modal-content">
-                <h2 id="waste-name">Atık Türü</h2>
-                <p id="waste-instruction">Lütfen uygun kutuya atın.</p>
-                <button id="action-btn">Kutuya Attım!</button>
-            </div>
+        <!-- Sürekli Güncellenen Panel -->
+        <div id="status-panel">
+            <span id="waste-name">Atık Aranıyor...</span>
+            <p id="waste-instruction">Lütfen atığı kameraya gösterin.</p>
+            <button id="confirm-btn" class="hidden">Kutuya Attım ✅</button>
         </div>
+    
+        <div id="webcam-container"></div>
     </section>
 
     <section id="success-screen" class="screen hidden">

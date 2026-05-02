@@ -51,18 +51,60 @@ async function loop() {
 
 let isPopupActive = false; // Pop-up'ın açık olup olmadığını takip eder
 
-async function predict() {
-    if (isPopupActive) return; // Pop-up açıksa yeni tahmin yapma
+// ... (Model yükleme ve init fonksiyonları aynı)
 
+async function predict() {
     const prediction = await model.predict(webcam.canvas);
     
+    // En yüksek olasılığa sahip tahmini bul
+    let highestPred = { className: "", probability: 0 };
     for (let i = 0; i < maxPredictions; i++) {
-        if (prediction[i].probability > 0.85) {
-            isPopupActive = true; // Tahmin başarılı, kilidi aktifleştir
-            showPopup(prediction[i].className);
+        if (prediction[i].probability > highestPred.probability) {
+            highestPred = prediction[i];
         }
     }
+
+    updateUI(highestPred);
 }
+
+function updateUI(pred) {
+    const nameEl = document.getElementById('waste-name');
+    const instrEl = document.getElementById('waste-instruction');
+    const panel = document.getElementById('status-panel');
+    const btn = document.getElementById('confirm-btn');
+
+    // Eğer güven oranı %85 üzerindeyse içeriği güncelle
+    if (pred.probability > 0.85) {
+        nameEl.innerText = pred.className;
+        btn.classList.remove('hidden');
+        
+        // Sınıfa göre renk ve talimat değiştir
+        panel.className = ""; // Temizle
+        if (pred.className === "Plastik") {
+            panel.classList.add('status-plastik');
+            instrEl.innerText = "Sarı atık kutusuna bırakabilirsiniz.";
+        } else if (pred.className === "Karton") {
+            panel.classList.add('status-karton');
+            instrEl.innerText = "Mavi atık kutusuna bırakabilirsiniz.";
+        } else if (pred.className === "Cam") {
+            panel.classList.add('status-cam');
+            instrEl.innerText = "Yeşil atık kutusuna bırakabilirsiniz.";
+        }
+    } else {
+        // Belirsiz durum (Ekranda net bir şey yoksa)
+        nameEl.innerText = "Atık Aranıyor...";
+        instrEl.innerText = "Lütfen atığı net bir şekilde gösterin.";
+        panel.className = ""; 
+        btn.classList.add('hidden');
+    }
+}
+
+// "Kutuya Attım" butonu ile tebrik ekranına geçiş
+document.getElementById('confirm-btn').addEventListener('click', () => {
+    webcam.stop();
+    cameraScreen.classList.add('hidden');
+    successScreen.classList.remove('hidden');
+});
 
 function showPopup(wasteType) {
     document.getElementById('waste-name').innerText = "Bu bir " + wasteType + "!";
