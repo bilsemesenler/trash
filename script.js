@@ -10,7 +10,8 @@ const cameraScreen = document.getElementById('camera-screen');
 const successScreen = document.getElementById('success-screen');
 const resultPopup = document.getElementById('result-popup');
 
-// Modeli Yükle
+
+
 async function init() {
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
@@ -18,15 +19,29 @@ async function init() {
     model = await tmImage.load(modelURL, metadataURL);
     maxPredictions = model.getTotalClasses();
 
-    // Kamera Ayarları
-    const flip = true; 
-    webcam = new tmImage.Webcam(window.innerWidth * 0.9, window.innerWidth * 0.9, flip); 
-    await webcam.setup(); 
-    await webcam.play();
-    window.requestAnimationFrame(loop);
+    // ARKA KAMERA AYARLARI
+    // Flip: false yapıyoruz çünkü arka kamera ayna görüntüsü gerektirmez.
+    const flip = false; 
+    
+    // Mobil uyumlu genişlik/yükseklik
+    const width = window.innerWidth * 0.9;
+    const height = window.innerWidth * 0.9;
 
-    document.getElementById("webcam-container").appendChild(webcam.canvas);
+    webcam = new tmImage.Webcam(width, height, flip); 
+
+    // .setup() içine 'facingMode: "environment"' ekleyerek arka kamerayı zorluyoruz
+    try {
+        await webcam.setup({ facingMode: "environment" }); 
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+    } catch (err) {
+        console.error("Kamera başlatılamadı: ", err);
+        alert("Kamera izni verilmeli veya cihazda arka kamera bulunamadı.");
+    }
 }
+
+
 
 async function loop() {
     webcam.update(); 
