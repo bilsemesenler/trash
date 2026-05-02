@@ -1,152 +1,45 @@
 body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0fdf4; /* Açık yeşil arka plan */
-    color: #166534;
+    font-family: sans-serif;
+    background-color: #f0fdf4;
     overflow: hidden;
 }
 
-.screen {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-    transition: 0.5s;
-}
-
+.screen { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .hidden { display: none !important; }
 
-h1 { font-size: 2.5rem; margin-bottom: 20px; color: #15803d; }
+#status-panel {
+    position: fixed;
+    top: 20px;
+    width: 90%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 20px;
+    z-index: 100;
+    border: 3px solid #ccc;
+    transition: 0.3s;
+}
 
-.hero-image { font-size: 80px; margin: 20px 0; }
+/* Dinamik Renkler */
+.status-plastik { border-color: #fbbf24; }
+.status-karton { border-color: #3b82f6; }
+.status-cam { border-color: #10b981; }
+
+#webcam-container canvas {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 20px;
+    border: 5px solid #22c55e;
+}
 
 button {
     background-color: #22c55e;
     color: white;
     border: none;
-    padding: 15px 40px;
-    font-size: 1.2rem;
+    padding: 15px 30px;
     border-radius: 50px;
+    font-size: 1.1rem;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-button:active { transform: scale(0.95); }
-
-#webcam-container {
-    width: 100%;
-    max-width: 400px;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 5px solid #22c55e;
-}
-
-#label-container {
-    margin-top: 20px;
-    font-weight: bold;
-    font-size: 1.2rem;
-}
-
-/* Modal Tasarımı */
-/* Modal (Dış Çerçeve) */
-.modal {
-    position: fixed;
-    top: 20px; /* Üstten biraz boşluk */
-    left: 0;
-    width: 100%;
-    height: auto; /* Tüm ekranı kaplamasın */
-    background: transparent; /* Arka planı karartma */
-    display: flex;
-    align-items: flex-start; /* Üste hizala */
-    justify-content: center;
-    z-index: 1000;
-    pointer-events: none; /* Altındaki kameraya tıklanabilsin */
-}
-
-/* Pop-up İçeriği (Kart) */
-.modal-content {
-    background: rgba(255, 255, 255, 0.95); /* Hafif şeffaf beyaz */
-    padding: 15px 25px;
-    border-radius: 15px;
-    width: 85%;
-    max-width: 350px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    border-top: 5px solid #22c55e; /* Yeşil şerit */
-    pointer-events: auto; /* Sadece karta tıklanabilsin */
-    animation: slideDown 0.4s ease-out;
-}
-
-/* Animasyon: Yukarıdan aşağı süzülme */
-@keyframes slideDown {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-#waste-name {
-    font-size: 1.4rem;
-    margin: 0 0 5px 0;
-    color: #166534;
-}
-
-#waste-instruction {
-    font-size: 0.9rem;
-    margin: 0 0 10px 0;
-    color: #374151;
-}
-
-#action-btn {
-    padding: 8px 20px;
-    font-size: 0.9rem;
-}
-
-.badge { font-size: 100px; margin: 20px 0; }
-
-/* Canlı Takip Paneli */
-#status-panel {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 400px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px); /* Modern cam efekti */
-    padding: 15px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    z-index: 100;
-    text-align: center;
-    border: 3px solid #ccc; /* Varsayılan renk */
-    transition: all 0.3s ease;
-}
-
-/* Atık Türlerine Göre Dinamik Renkler */
-.status-plastik { border-color: #fbbf24 !important; background: rgba(255, 251, 235, 0.9) !important; }
-.status-karton { border-color: #3b82f6 !important; background: rgba(239, 246, 255, 0.9) !important; }
-.status-cam { border-color: #10b981 !important; background: rgba(236, 253, 245, 0.9) !important; }
-
-#waste-name {
-    display: block;
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-#waste-instruction {
-    font-size: 0.9rem;
-    color: #4b5563;
-    margin-bottom: 10px;
-}
-
-#confirm-btn {
-    background-color: #22c55e;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
+    margin-top: 10px;
 }

@@ -1,47 +1,42 @@
-// Teachable Machine model bağlantınız (Modelinizi export edip URL'yi buraya yapıştırın)
-// Eğer dosyalar Drive'daysa, model.json, metadata.json ve weights.bin aynı klasörde olmalı
-const URL = "./"; 
+const URL = "./"; // model.json, metadata.json ve weights.bin bu dizinde olmalı
 
-let model, webcam, labelContainer, maxPredictions;
+let model, webcam, maxPredictions;
 
-// Ekran Kontrolleri
 const welcomeScreen = document.getElementById('welcome-screen');
 const cameraScreen = document.getElementById('camera-screen');
 const successScreen = document.getElementById('success-screen');
-const resultPopup = document.getElementById('result-popup');
 
-
-
+// SİSTEMİ BAŞLAT
 async function init() {
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
-
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
-
-    // ARKA KAMERA AYARLARI
-    // Flip: false yapıyoruz çünkü arka kamera ayna görüntüsü gerektirmez.
-    const flip = false; 
-    
-    // Mobil uyumlu genişlik/yükseklik
-    const width = window.innerWidth * 0.9;
-    const height = window.innerWidth * 0.9;
-
-    webcam = new tmImage.Webcam(width, height, flip); 
-
-    // .setup() içine 'facingMode: "environment"' ekleyerek arka kamerayı zorluyoruz
     try {
-        await webcam.setup({ facingMode: "environment" }); 
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        const flip = false; // Arka kamera için false
+        const width = window.innerWidth * 0.9;
+        const height = window.innerWidth * 0.9;
+
+        webcam = new tmImage.Webcam(width, height, flip); 
+        
+        await webcam.setup({ facingMode: "environment" }); // Arka kamera zorlaması
         await webcam.play();
+        
         window.requestAnimationFrame(loop);
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        
+        const container = document.getElementById("webcam-container");
+        container.innerHTML = ""; // Varsa temizle
+        container.appendChild(webcam.canvas);
+
+        document.getElementById('waste-name').innerText = "Atık Aranıyor...";
+        document.getElementById('waste-instruction').innerText = "Lütfen atığı kameraya gösterin.";
     } catch (err) {
-        console.error("Kamera başlatılamadı: ", err);
-        alert("Kamera izni verilmeli veya cihazda arka kamera bulunamadı.");
+        console.error(err);
+        alert("Kamera veya Model yüklenemedi. Lütfen HTTPS bağlantısını ve izinleri kontrol edin.");
     }
 }
-
-
 
 async function loop() {
     webcam.update(); 
@@ -49,21 +44,16 @@ async function loop() {
     window.requestAnimationFrame(loop);
 }
 
-let isPopupActive = false; // Pop-up'ın açık olup olmadığını takip eder
-
-// ... (Model yükleme ve init fonksiyonları aynı)
-
 async function predict() {
+    if (!model) return;
     const prediction = await model.predict(webcam.canvas);
     
-    // En yüksek olasılığa sahip tahmini bul
     let highestPred = { className: "", probability: 0 };
     for (let i = 0; i < maxPredictions; i++) {
         if (prediction[i].probability > highestPred.probability) {
             highestPred = prediction[i];
         }
     }
-
     updateUI(highestPred);
 }
 
@@ -73,13 +63,11 @@ function updateUI(pred) {
     const panel = document.getElementById('status-panel');
     const btn = document.getElementById('confirm-btn');
 
-    // Eğer güven oranı %85 üzerindeyse içeriği güncelle
     if (pred.probability > 0.85) {
         nameEl.innerText = pred.className;
         btn.classList.remove('hidden');
-        
-        // Sınıfa göre renk ve talimat değiştir
-        panel.className = ""; // Temizle
+        panel.className = ""; // Eski sınıfları temizle
+
         if (pred.className === "Plastik") {
             panel.classList.add('status-plastik');
             instrEl.innerText = "Sarı atık kutusuna bırakabilirsiniz.";
@@ -91,7 +79,6 @@ function updateUI(pred) {
             instrEl.innerText = "Yeşil atık kutusuna bırakabilirsiniz.";
         }
     } else {
-        // Belirsiz durum (Ekranda net bir şey yoksa)
         nameEl.innerText = "Atık Aranıyor...";
         instrEl.innerText = "Lütfen atığı net bir şekilde gösterin.";
         panel.className = ""; 
@@ -99,46 +86,17 @@ function updateUI(pred) {
     }
 }
 
-// "Kutuya Attım" butonu ile tebrik ekranına geçiş
-document.getElementById('confirm-btn').addEventListener('click', () => {
-    webcam.stop();
-    cameraScreen.classList.add('hidden');
-    successScreen.classList.remove('hidden');
-});
-
-function showPopup(wasteType) {
-    document.getElementById('waste-name').innerText = "Bu bir " + wasteType + "!";
-    
-    // Türlere göre yönlendirme
-    let instruction = "Uygun kutuya atın.";
-    if(wasteType === "Plastik") instruction = "Sarı kutuya atılmalı.";
-    else if(wasteType === "Karton") instruction = "Mavi kutuya atılmalı.";
-    
-    document.getElementById('waste-instruction').innerText = instruction;
-    resultPopup.classList.remove('hidden');
-}
-
-// Butona tıklandığında pop-up'ı kapat ve yeni tarama için kilidi kaldır
-document.getElementById('action-btn').addEventListener('click', () => {
-    resultPopup.classList.add('hidden');
-    isPopupActive = false; // Yeni taramalara izin ver
-    
-    // Opsiyonel: Direkt tebrik ekranına geçmek yerine taramaya devam edebilirsin
-    // successScreen.classList.remove('hidden'); // Eğer bu satırı silersen sürekli tarama yapabilir
-});
-
-// Buton Etkinlikleri
+// BUTON OLAYLARI (Tek seferde tanımlandı)
 document.getElementById('start-btn').addEventListener('click', async () => {
     welcomeScreen.classList.add('hidden');
     cameraScreen.classList.remove('hidden');
     await init();
 });
 
-document.getElementById('action-btn').addEventListener('click', () => {
-    resultPopup.classList.add('hidden');
+document.getElementById('confirm-btn').addEventListener('click', () => {
+    if (webcam) webcam.stop();
     cameraScreen.classList.add('hidden');
     successScreen.classList.remove('hidden');
-    webcam.stop(); // Pil tasarrufu için kamerayı kapat
 });
 
 document.getElementById('restart-btn').addEventListener('click', () => {

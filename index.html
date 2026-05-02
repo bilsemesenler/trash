@@ -8,29 +8,27 @@
 </head>
 <body>
 
+    <!-- 1. EKRAN: KARŞILAMA -->
     <section id="welcome-screen" class="screen">
         <div class="content">
             <h1>Doğanın Koruyucuları</h1>
-            <div class="hero-image">
-                🌱♻️🌍
-            </div>
+            <div class="hero-image">🌱♻️🌍</div>
             <p>Atıkları doğru kutulara atarak dünyamızı kurtarmaya hazır mısın?</p>
             <button id="start-btn">BAŞLA</button>
         </div>
     </section>
 
-    <!-- Kamera Ekranı İçinde -->
+    <!-- 2. EKRAN: KAMERA VE TESPİT -->
     <section id="camera-screen" class="screen hidden">
-        <!-- Sürekli Güncellenen Panel -->
         <div id="status-panel">
-            <span id="waste-name">Atık Aranıyor...</span>
-            <p id="waste-instruction">Lütfen atığı kameraya gösterin.</p>
+            <span id="waste-name">Model Yükleniyor...</span>
+            <p id="waste-instruction">Lütfen bekleyin...</p>
             <button id="confirm-btn" class="hidden">Kutuya Attım ✅</button>
         </div>
-    
         <div id="webcam-container"></div>
     </section>
 
+    <!-- 3. EKRAN: TEBRİKLER -->
     <section id="success-screen" class="screen hidden">
         <div class="content">
             <h2>Tebrikler!</h2>
