@@ -1,121 +1,83 @@
-// Model dosyalarınızın bulunduğu klasör yolu. 
-// "model.json", "metadata.json" ve "weights.bin" bu klasörde olmalı.
 const URL = "./"; 
-
 let model, webcam, maxPredictions;
-let isScanning = false;
+let isAnalysing = false;
 
-// Sayfa Elemanları
-const welcomeScreen = document.getElementById('welcome-screen');
-const cameraScreen = document.getElementById('camera-screen');
-const successScreen = document.getElementById('success-screen');
-const resultPanel = document.getElementById('result-panel');
-const statusLabel = document.getElementById('status-label');
+// Elementler
+const welcome = document.getElementById('welcome-screen');
+const cameraS = document.getElementById('camera-screen');
+const success = document.getElementById('success-screen');
+const overlay = document.getElementById('overlay-panel');
 
-// SİSTEMİ BAŞLAT
-async function init() {
-    try {
-        statusLabel.innerText = "Yapay Zeka Yükleniyor...";
-        
-        // Modeli yükle
-        model = await tmImage.load(URL + "model.json", URL + "metadata.json");
-        maxPredictions = model.getTotalClasses();
+async function startSystem() {
+    model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+    maxPredictions = model.getTotalClasses();
 
-        // Kamera Ayarları (Arka Kamera)
-        const flip = false; 
-        webcam = new tmImage.Webcam(350, 350, flip); 
-        
-        await webcam.setup({ facingMode: "environment" }); 
-        await webcam.play();
-        
-        document.getElementById("webcam-container").innerHTML = ""; // Temizle
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
-        
-        isScanning = true;
-        statusLabel.innerText = "Atık Aranıyor...";
-        window.requestAnimationFrame(loop);
-    } catch (err) {
-        console.error(err);
-        alert("Kamera başlatılamadı! Lütfen HTTPS kullandığınızdan ve izin verdiğinizden emin olun.");
+    webcam = new tmImage.Webcam(window.innerWidth, window.innerHeight, false);
+    await webcam.setup({ facingMode: "environment" });
+    await webcam.play();
+
+    document.getElementById("webcam-container").appendChild(webcam.canvas);
+    isAnalysing = true;
+    window.requestAnimationFrame(updateFrame);
+}
+
+async function updateFrame() {
+    if (isAnalysing) {
+        webcam.update();
+        await scan();
+        window.requestAnimationFrame(updateFrame);
     }
 }
 
-async function loop() {
-    if (isScanning) {
-        webcam.update(); 
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
-}
-
-async function predict() {
+async function scan() {
     const prediction = await model.predict(webcam.canvas);
     
     for (let i = 0; i < maxPredictions; i++) {
-        // %90 üzerinde eşleşme varsa dur ve göster
-        if (prediction[i].probability > 0.90) {
-            isScanning = false;
-            showResult(prediction[i].className);
+        // %60'ın üzerinde bir eşleşme bulana kadar sessizce çalışır
+        if (prediction[i].probability > 0.60) {
+            isAnalysing = false; // Taramayı durdur ve paneli göster
+            displayMatch(prediction[i].className);
             break;
         }
     }
 }
 
-function showResult(type) {
-    const nameEl = document.getElementById('waste-name');
-    const instrEl = document.getElementById('waste-instruction');
-    const emojiEl = document.getElementById('waste-emoji');
-    const panel = document.querySelector('.result-card');
+function displayMatch(name) {
+    const nameText = document.getElementById('waste-name');
+    const icon = document.getElementById('waste-icon');
     
-    statusLabel.classList.add('hidden');
-    resultPanel.classList.remove('hidden');
+    nameText.innerText = name.toUpperCase();
+    
+    // Türlere göre hızlı ikon atama
+    if(name.includes("Plastik")) icon.innerText = "🥤";
+    else if(name.includes("Karton") || name.includes("Kağıt")) icon.innerText = "📦";
+    else if(name.includes("Cam")) icon.innerText = "🍾";
+    else icon.innerText = "♻️";
 
-    // Türlere Göre Dinamik İçerik
-    if (type === "Plastik") {
-        emojiEl.innerText = "🥤";
-        nameEl.innerText = "BU BİR PLASTİK!";
-        panel.style.borderTopColor = "#fbbf24"; // Sarı
-        instrEl.innerText = "Lütfen SARI renkli plastik atık kutusuna atın.";
-    } else if (type === "Karton" || type === "Kağıt") {
-        emojiEl.innerText = "📦";
-        nameEl.innerText = "BU BİR KARTON!";
-        panel.style.borderTopColor = "#3b82f6"; // Mavi
-        instrEl.innerText = "Lütfen MAVİ renkli kağıt atık kutusuna atın.";
-    } else if (type === "Cam") {
-        emojiEl.innerText = "🍾";
-        nameEl.innerText = "BU BİR CAM!";
-        panel.style.borderTopColor = "#10b981"; // Yeşil
-        instrEl.innerText = "Lütfen YEŞİL renkli cam atık kutusuna atın.";
-    } else {
-        emojiEl.innerText = "♻️";
-        nameEl.innerText = type.toUpperCase();
-        panel.style.borderTopColor = "#22c55e";
-        instrEl.innerText = "Uygun geri dönüşüm kutusuna bırakın.";
-    }
+    overlay.classList.remove('hidden');
 }
 
-// ETKİLEŞİMLER
+// Buton Etkileşimleri
 document.getElementById('start-btn').addEventListener('click', () => {
-    welcomeScreen.classList.add('hidden');
-    cameraScreen.classList.remove('hidden');
-    init();
+    welcome.classList.add('hidden');
+    cameraS.classList.remove('hidden');
+    startSystem();
 });
 
 document.getElementById('retry-btn').addEventListener('click', () => {
-    resultPanel.classList.add('hidden');
-    statusLabel.classList.remove('hidden');
-    isScanning = true;
-    window.requestAnimationFrame(loop);
+    overlay.classList.add('hidden');
+    isAnalysing = true;
+    window.requestAnimationFrame(updateFrame);
 });
 
 document.getElementById('confirm-btn').addEventListener('click', () => {
-    if(webcam) webcam.stop();
-    cameraScreen.classList.add('hidden');
-    successScreen.classList.remove('hidden');
+    webcam.stop();
+    cameraS.classList.add('hidden');
+    success.classList.remove('hidden');
 });
 
 document.getElementById('restart-btn').addEventListener('click', () => {
-    successScreen.classList.add('hidden');
-    welcomeScreen.classList.remove('hidden');
-    resultPanel.classList.add('hidden');
+    success.classList.add('hidden');
+    welcome.classList.remove('hidden');
+    overlay.classList.add('hidden');
 });
